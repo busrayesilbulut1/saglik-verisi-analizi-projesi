@@ -395,8 +395,8 @@ saglik_db/
 ### Şema Diyagramı
  
 > Renk kodlaması: 🔵 Klinik · 🟢 Reçete · 🟡 Görüntüleme · 🟣 Lab · 🔴 Genetik · 🔷 ML/Risk · 🟤 Güvenlik
->
-> ```mermaid
+
+ ```mermaid
 erDiagram
   HASTA {
     uuid hasta_id PK
