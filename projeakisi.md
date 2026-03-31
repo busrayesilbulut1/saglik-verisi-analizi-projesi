@@ -60,4 +60,4 @@ Projenin ilk aşamasında, sistemden kimlerin ne beklediğini ve teknik olarak n
 ---
 
 ## 2. Hafta
-İlerleyen haftalarda doldurulacaktır.
+[ UI/UX Figma Wireframe Tasarımı](https://www.figma.com/design/3Yn5izP8b1waj3hN70nJ0z/Wireframe?node-id=0-1&t=sL417Uu9OZoXaokZ-1)
