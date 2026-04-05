@@ -51,7 +51,7 @@ Projenin ilk aşamasında, sistemden kimlerin ne beklediğini ve teknik olarak n
 #### Teknik ve Performans Beklentileri
 * **Güvenlik:** Sağlık verisiyle çalıştığımız için uçtan uca şifreleme ve yetkilendirme katmanları şart. (KVKK uyumu için kritik).
 * **Ölçeklenebilirlik:** Veri hacmi arttığında Spark/Hadoop yapısının performans kaybını önlemesini bekliyoruz.
-* **Hız Hedefi:** Kullanıcı deneyimi açısından raporlama ve analiz süreçlerinin 5 saniye gibi makul sürelerde tamamlanmasını hedefliyoruz (Altyapı araştırmalarında bu süre baz alınabilir).
+* **Hız Hedefi:** Kullanıcı deneyimi açısından hasta dashboard'u ve raporlama ekranlarının ≤5 saniyede yüklenmesini hedefliyoruz. DICOM görüntü analizi ve model inference gibi işlemler asenkron çalışacağından bu hedefin kapsamı dışındadır.
 
 
 **Melek Şimşek**: Veri temizleme yöntemleri araştırması.
@@ -66,4 +66,4 @@ Projenin ilk aşamasında, sistemden kimlerin ne beklediğini ve teknik olarak n
 ## 3. Hafta
 [ UI/UX Figma Wireframe Tasarımı](https://www.figma.com/design/3Yn5izP8b1waj3hN70nJ0z/Wireframe?node-id=0-1&t=sL417Uu9OZoXaokZ-1)
 
-**Frame 4 Notu:** Zaman Çizelgesi ekranında bir what-if simülasyonu özelliği tasarladım. Bu özellik, farklı tedavi senaryolarının tahmini sonuçlarını karşılaştırmalı olarak sunar. Başlangıçta planlanmadığından şimdilik wireframe olarak bıraktım. Ekip uygun görürse sonraki haftalarda birlikte ekleyebiliriz. 
+**Frame 4 Notu:** Zaman Çizelgesi ekranında bir what-if simülasyonu özelliği tasarladım. Bu özellik, farklı tedavi senaryolarının tahmini sonuçlarını karşılaştırmalı olarak sunar. What-if frame'i v2 için tasarlanmıştır. 
