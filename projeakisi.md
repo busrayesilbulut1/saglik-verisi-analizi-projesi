@@ -935,4 +935,239 @@ Trigger tabanlı audit log tüm tablolarda tek noktadan değişiklik izlenmesini
  
 ---
 
+## 4.Hafta
+
+---
+ 
+## 🔍 Hafta 3 Gözden Geçirme — Tespit Edilen Sorunlar
+ 
+Hafta 2/3'te oluşturulan `data_cleaning_pipeline.py` incelenerek aşağıdaki eksikler ve hatalar saptanmıştır:
+ 
+### 🔴 Kritik Hatalar
+ 
+| # | Sorun | Etki | Dosya / Satır |
+|---|-------|------|---------------|
+| 1 | `fillna(inplace=True)` Pandas 3.x'te copy üzerinde çalışmıyor | Eksik değerler hiç doldurulmuyordu | `handle_missing_values` |
+| 2 | `LabelEncoder` mapping'i kaydedilmiyordu | Her çalıştırmada kategorilere farklı kod atanıyordu (tekrarlanamaz sonuçlar) | `encode_categoricals` |
+| 3 | `MinMaxScaler` fit+transform ayrılmamıştı | Test verisinde `fit()` çağrılıyordu → veri sızıntısı (data leakage) riski | `normalize_numeric` |
+ 
+### 🟡 Eksik Özellikler
+ 
+| # | Eksik | Etki |
+|---|-------|------|
+| 4 | Veri tipi tutarsızlıklarına otomatik müdahale yoktu | `"123.4"` gibi string sayılar LabelEncoder'ı bozuyordu |
+| 5 | Metin standardizasyonu yoktu | `"Erkek"`, `"ERKEK"`, `" erkek "` → 3 ayrı kategori sayılıyordu |
+| 6 | Sadece IQR aykırı değer yöntemi vardı | Dağılımı farklı sütunlarda yetersiz kalıyordu |
+| 7 | Aykırı değerler yalnızca kaldırılabiliyordu | Klinik veride satır kaybetmek yerine sınırlamak daha uygun |
+| 8 | Çarpıklık (skewness) tespiti ve düzeltme yoktu | Yüksek skew'lı lab değerleri ML modelini olumsuz etkileyecekti |
+| 9 | KVKK hash'inde salt kullanılmıyordu | Rainbow table saldırısına karşı savunmasızdı |
+| 10 | Doğrulama kuralları sadece aralık ve izin listesi içeriyordu | Regex, boş olamaz ve çapraz alan kuralları eksikti |
+ 
+---
+ 
+## ✅ Yapılan İyileştirmeler (`data_cleaning_pipeline_v2.py`)
+ 
+### 1. Pandas 3.x Uyumluluğu — `fillna` Düzeltmesi
+ 
+```python
+# ❌ Eski (Hafta 2/3) — Pandas 3.x'te çalışmıyor
+df[col].fillna(fill_val, inplace=True)
+ 
+# ✅ Yeni — atama ile düzeltildi
+df[col] = df[col].fillna(fill_val)
+```
+ 
+### 2. Veri Tipi Düzeltme — `fix_data_types` [YENİ]
+ 
+Sayı gibi görünen `object` sütunları otomatik olarak sayısala dönüştürülür. Manuel `type_map` ile tarih ve boolean dönüşümleri de desteklenir:
+ 
+```python
+fix_data_types(df, type_map={"giris_tarihi": "datetime", "aktif": "bool"})
+```
+ 
+### 3. Metin Standardizasyonu — `clean_text_columns` [YENİ]
+ 
+Büyük/küçük harf, baştaki/sondaki boşluk ve özel karakter tutarsızlıklarını giderir:
+ 
+```python
+# Öncesi: "Erkek", "ERKEK", " erkek " → 3 benzersiz kategori
+# Sonrası: "Erkek", "Erkek", "Erkek"  → 1 kategori
+clean_text_columns(df, ["cinsiyet", "kan_grubu"])
+```
+ 
+### 4. Tarih Standardizasyonu — `standardize_dates` [YENİ]
+ 
+Farklı formatlardaki (`DD/MM/YYYY`, `DD.MM.YYYY`, `YYYY-MM-DD`) tarih sütunlarını tek formata çevirir:
+ 
+```python
+standardize_dates(df, ["giris_tarihi"], fmt="%Y-%m-%d")
+```
+ 
+### 5. Skewness'a Göre Akıllı Eksik Değer Doldurma [İYİLEŞTİRİLDİ]
+ 
+Hafta 2'de her sayısal sütuna medyan uygulanıyordu. Yeni versiyonda dağılım skewness'a göre değerlendirilir:
+ 
+```python
+# |skew| > 1 → medyan (aykırı değerlerden etkilenmez)
+# |skew| ≤ 1 → ortalama
+fill_val = df[col].median() if abs(df[col].skew()) > 1 else df[col].mean()
+```
+ 
+### 6. Çift Yöntemli Aykırı Değer Tespiti [İYİLEŞTİRİLDİ]
+ 
+Z-Score yöntemi eklendi; `method="both"` ile her iki yöntem birleştirilebilir. `action="cap"` ile kaldırma yerine sınır değere çekme de desteklenir:
+ 
+```python
+# IQR + Z-Score birleşimi, kaldırma yerine sınırlandırma (klinik veriye uygun)
+handle_outliers(df, ["sistolik_kb"], method="both", action="cap")
+```
+ 
+### 7. Log1p Çarpıklık Düzeltme — `fix_skewness` [YENİ]
+ 
+Enzim değerleri, laboratuvar sonuçları gibi sağa çarpık dağılımlı sütunlara log1p dönüşümü uygulanır:
+ 
+```python
+# Öncesi: skewness = 15.57 (aşırı sağa çarpık)
+# Sonrası: skewness = -0.14 (normale yakın)
+df, transformed = fix_skewness(df, ["enzim_degeri"], threshold=1.0)
+```
+ 
+### 8. LabelEncoder Mapping Kaydı [DÜZELTİLDİ]
+ 
+Artık her encoding işleminden sonra `mapping_dict` döndürülür ve JSON raporuna yazılır:
+ 
+```python
+df, encoders, mappings = encode_categoricals(df, ["cinsiyet"])
+# mappings["cinsiyet"] = {"Erkek": 0, "Kadın": 1, "Bilinmiyor": 2}
+```
+ 
+### 9. Scaler Train/Test Ayrımı [DÜZELTİLDİ]
+ 
+Scaler fit edilmiş halde döndürülür; test setine sadece `transform` uygulanır:
+ 
+```python
+# Train seti
+train_df, scaler = normalize_numeric(train_df, columns, method="minmax")
+ 
+# Test seti — aynı scaler, yeniden fit YOK
+test_df, _ = normalize_numeric(test_df, columns, scaler=scaler)
+```
+ 
+### 10. Salt ile Anonimleştirme [İYİLEŞTİRİLDİ]
+ 
+```python
+# ❌ Eski: SHA256(tc_kimlik_no) → rainbow table ile kırılabilir
+# ✅ Yeni: SHA256(salt + tc_kimlik_no) → salt olmadan eşleştirilemez
+anonymize_columns(df, ["tc_kimlik_no"], salt="bayt_bukuculer_2025")
+```
+ 
+### 11. Genişletilmiş Doğrulama Kuralları [GENİŞLETİLDİ]
+ 
+```python
+validation_rules = {
+    "yas":          {"min": 0, "max": 120, "not_null": True},      # Boş olamaz
+    "email":        {"regex": r"^[\w\.\-]+@[\w\-]+\.[a-z]{2,}$"}, # Format kontrolü
+    "diastolik_kb": {                                               # Çapraz alan kuralı
+        "cross_field": {"field": "diastolik_kb", "op": "<", "target": "sistolik_kb"}
+    },
+}
+```
+ 
+---
+ 
+## 🧪 Test Sonuçları
+ 
+Test verisi: **500 sentetik hasta kaydı** (bilinçli olarak hatalar, aykırı değerler ve eksikler içeriyor)
+ 
+```
+=================================================================
+  BAYT BÜKÜCÜLER — HAFTA 4 TEST SÜİTİ
+=================================================================
+ 
+📦 Test verisi üretiliyor (n=500)...
+   ✓ 500 satır, 15 sütun
+ 
+─────────────────────────────────────────────────────────────────
+  TEST ADI                                   SONUÇ
+─────────────────────────────────────────────────────────────────
+  Veri Tipi Düzeltme                         ✅
+  Metin Temizleme                            ✅  6 → 3 benzersiz kategori
+  Tarih Standardizasyonu                     ✅  YYYY-MM-DD formatına dönüştürüldü
+  Eksik Değer Doldurma                       ✅  246 eksik → 0
+  Aykırı Değer — IQR Kaldırma               ✅  500 → 497 satır
+  Aykırı Değer — IQR Cap                    ✅  Satır kaybı yok, max_yas = 110.1
+  Aykırı Değer — Z-Score                    ✅  enzim_degeri: 8000 → 451 max
+  Çarpıklık Düzeltme                         ✅  skewness: 15.57 → -0.14
+  Kategorik Mapping Kaydı                    ✅  {"Erkek": 0, "Kadın": 1, ...}
+  Scaler Ayrımı (No Leakage)                ✅  Fit sadece train'de
+  Çapraz Alan Doğrulaması                    ✅  diastolik < sistolik kuralı
+  Anonimleştirme (Salt)                      ✅  Farklı salt → farklı hash
+  Tam Pipeline v2                            ✅  500 → 480 satır, 0 eksik
+─────────────────────────────────────────────────────────────────
+  TOPLAM: 13/13 geçti  🎉 Tüm testler geçti!
+=================================================================
+```
+ 
+### Pipeline Özet Metrikleri (500 satır test verisi)
+ 
+| Metrik | Değer |
+|--------|-------|
+| Başlangıç satır sayısı | 500 |
+| Temizleme sonrası satır sayısı | 480 |
+| Kaldırılan satır oranı | %4.0 |
+| Temizleme öncesi eksik sütun sayısı | 7 |
+| Temizleme sonrası eksik sütun sayısı | 0 |
+| Enzim değeri skewness (öncesi) | 15.57 |
+| Enzim değeri skewness (sonrası) | -0.14 |
+| Cinsiyet benzersiz değer (öncesi) | 6 |
+| Cinsiyet benzersiz değer (sonrası) | 3 |
+ 
+---
+ 
+## 📁 Dosya Yapısı
+ 
+```
+bayt-bukuculer/
+├── hafta4/
+│   ├── data_cleaning_pipeline_v2.py   # Geliştirilmiş pipeline  ← bu hafta
+│   ├── test_pipeline.py               # Test süiti              ← bu hafta
+│   └── data/
+│       ├── test_hasta_kayitlari.csv   # Otomatik üretilen test verisi
+│       ├── test_temizlenmis_v2.csv    # Pipeline çıktısı
+│       ├── test_cleaning_report_v2.json  # Detaylı temizleme raporu
+│       ├── test_raporu.json           # Test sonuçları
+│       └── pipeline_v2.log           # Çalışma logu
+├── hafta2/
+│   └── data_cleaning_pipeline.py     # Önceki versiyon (referans)
+└── README.md
+```
+ 
+---
+ 
+## 🚀 Kullanım
+ 
+```bash
+# Bağımlılıkları yükle
+pip install pandas numpy scikit-learn scipy
+ 
+# Testleri çalıştır
+python hafta4/test_pipeline.py
+ 
+# Pipeline'ı kendi verinizle kullanın
+python -c "
+from hafta4.data_cleaning_pipeline_v2 import run_pipeline_v2
+result = run_pipeline_v2(
+    input_path='data/hasta_kayitlari.csv',
+    output_path='data/temiz.csv',
+    text_columns=['cinsiyet', 'kan_grubu'],
+    outlier_columns=['yas', 'sistolik_kb'],
+    outlier_method='both',
+    outlier_action='cap',
+    sensitive_columns=['tc_kimlik_no', 'email'],
+)
+"
+```
+ 
+---
+
 *Bu README proje ilerledikçe güncellenecektir.*
