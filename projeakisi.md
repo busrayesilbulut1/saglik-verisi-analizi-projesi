@@ -63,7 +63,7 @@ Projenin ilk aşamasında, sistemden kimlerin ne beklediğini ve teknik olarak n
 
 Bu haftaki görev kapsamında, projedeki sağlık verilerini (klinik kayıtlar, laboratuvar sonuçları, risk skorları) anlamlı biçimde sunabilmek için farklı görselleştirme araçlarını inceledim. Değerlendirmemi 1. haftada belirlenen paydaş beklentileri ve performans hedefleri üzerine kurdum: doktorların hızla yorumlayabileceği, ≤5 saniyede yüklenen, KVKK uyumlu bir arayüz.
 
-### 1. İncelenen Araçlar
+#### 1. İncelenen Araçlar
 
 #### Tableau
 
@@ -112,7 +112,7 @@ Zaman serisi verilerini izlemek için tasarlanmış açık kaynaklı bir platfor
 
 ---
 
-### 2. Araçların Karşılaştırması
+#### 2. Araçların Karşılaştırması
 
 | Kriter | Tableau | Power BI | Plotly/Dash | Matplotlib | Grafana |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -125,7 +125,7 @@ Zaman serisi verilerini izlemek için tasarlanmış açık kaynaklı bir platfor
 
 ---
 
-### 3. Proje İçin Önerilen Görselleştirme Stratejisi
+#### 3. Proje İçin Önerilen Görselleştirme Stratejisi
 
 Tek bir araçta kalmak yerine, her katman için en uygun aracı kullanmak daha verimli bir yaklaşım olacaktır.
 
@@ -143,7 +143,7 @@ Tek bir araçta kalmak yerine, her katman için en uygun aracı kullanmak daha v
 
 ---
 
-### 4. Sağlık Verisine Özgü Görselleştirme Tipleri
+#### 4. Sağlık Verisine Özgü Görselleştirme Tipleri
 
 Projenin veri yapısına göre aşağıdaki grafik türleri dashboard tasarımında öncelikli olacaktır.
 
@@ -158,7 +158,7 @@ Projenin veri yapısına göre aşağıdaki grafik türleri dashboard tasarımı
 
 ---
 
-### 5. Sonuç
+#### 5. Sonuç
 
 Bu hafta yaptığım araştırma, görselleştirme katmanının tek bir araçla değil, katmana göre seçilmiş araç kombinasyonuyla kurulması gerektiğini ortaya koydu. Doktor arayüzü için **Plotly Dash**, analiz süreçleri için **Matplotlib/Seaborn**, yönetim raporlaması için **Power BI** önerilmektedir. Bu strateji, hem maliyet hem de teknik entegrasyon açısından projenin mevcut altyapısıyla en uyumlu yaklaşımdır.
 
