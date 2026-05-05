@@ -162,7 +162,6 @@ Projenin veri yapısına göre aşağıdaki grafik türleri dashboard tasarımı
 
 Bu hafta yaptığım araştırma, görselleştirme katmanının tek bir araçla değil, katmana göre seçilmiş araç kombinasyonuyla kurulması gerektiğini ortaya koydu. Doktor arayüzü için **Plotly Dash**, analiz süreçleri için **Matplotlib/Seaborn**, yönetim raporlaması için **Power BI** önerilmektedir. Bu strateji, hem maliyet hem de teknik entegrasyon açısından projenin mevcut altyapısıyla en uyumlu yaklaşımdır.
 
-3. haftada tasarlanan UI/UX wireframe'indeki ekranlar, bu araç seçimlerine dayalı olarak şekillendirilmiştir.
 
 ---
 
