@@ -167,6 +167,4 @@ Bu hafta yaptığım araştırma, görselleştirme katmanının tek bir araçla 
 ---
 
 ## 3. Hafta
-[ UI/UX Figma Wireframe Tasarımı](https://www.figma.com/design/3Yn5izP8b1waj3hN70nJ0z/Wireframe?node-id=0-1&t=sL417Uu9OZoXaokZ-1)
-
-**Frame 4 Notu:** Zaman Çizelgesi ekranında bir what-if simülasyonu özelliği tasarladım. Bu özellik, farklı tedavi senaryolarının tahmini sonuçlarını karşılaştırmalı olarak sunar. What-if frame'i v2 için tasarlanmıştır. 
+ 
