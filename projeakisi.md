@@ -1169,5 +1169,136 @@ result = run_pipeline_v2(
 ```
  
 ---
+## 5. Hafta
+ 
+---
+ 
+## 📋 Hafta 5: Veri Temizleme Süreçleri için İleri Yöntem Araştırması
+ 
+Hafta 4'te yapılan veri temizleme adımları gözden geçirildiğinde, mevcut pipeline'ın temel ihtiyaçları karşıladığı ancak klinik veri perspektifinden bazı yetersizlikler içerdiği görülmüştür. Bu hafta, **eksik ve hatalı verileri ele almak için literatürdeki ileri yöntemler araştırılmış**, mevcut pipeline'ın hangi noktalarda zayıf kaldığı analiz edilmiş ve sağlık verisi bağlamında önerilen iyileştirmeler raporlanmıştır.
+ 
+---
+ 
+## 🔍 Hafta 4 Pipeline'ının Sınırlamaları
+ 
+Hafta 4'te 13/13 test geçen `data_cleaning_pipeline_v2.py` incelendiğinde aşağıdaki sınırlamalar tespit edilmiştir:
+ 
+| # | Sınırlama | Neden Sorun? |
+|---|-----------|--------------|
+| 1 | Eksik değer doldurma sütun-bağımsız çalışıyor (medyan/ortalama) | Hastalar arası klinik benzerlik bilgisi kullanılmıyor |
+| 2 | Aykırı değer tespiti tek değişkenli (IQR / Z-Score) | Sütunların **kombinasyonu** garip olan kayıtlar gözden kaçıyor |
+| 3 | Bilgi taşımayan sütunlar (constant, quasi-constant) pipeline'a giriyor | ML modelinin performansını düşürüyor |
+| 4 | Yüksek kardinaliteli kategoriler (ör. 200+ ICD-10 kodu) ele alınmıyor | Modelde aşırı boyut artışına yol açıyor |
+| 5 | Sütunlar arası ilişki (kolinearite) analiz edilmiyor | Lineer modellerde katsayıların güvenilirliği sorgulanamıyor |
+| 6 | Train/üretim arası dağılım farkı (drift) kontrolsüz | Modelin "eskimişliği" tespit edilemiyor |
+ 
+---
+ 
+## 🧪 Araştırılan Yöntemler
+ 
+Bu sınırlamaları gidermek üzere literatürde en sık başvurulan yöntemler araştırılmış ve sağlık verisi bağlamında değerlendirilmiştir.
+ 
+### 1. Eksik Değer Doldurma için İleri Yöntemler
+ 
+#### KNN Imputation
+**Çalışma mantığı:** Eksik değer içeren bir hasta kaydı için, diğer sütunlarda en yakın K hasta bulunur. Eksik sütun bu komşuların ortalaması ile doldurulur.
+ 
+**Sağlık verisinde uygunluğu:** Yüksek. Çünkü yaş, kilo, kan basıncı gibi sütunlar birbiriyle ilişkilidir. 25 yaşında, 70 kg, sistolik 120 olan bir hastanın eksik kolesterol değeri için, benzer profildeki diğer hastaların ortalaması, tüm veri setinin medyanından çok daha doğru bir tahmin verir.
+ 
+**Sınırlama:** Sadece sayısal sütunlarda çalışır. Büyük veri setlerinde mesafe hesabı yavaş olabilir.
+ 
+#### MICE (Multiple Imputation by Chained Equations)
+**Çalışma mantığı:** Her eksik sütun, diğer sütunların fonksiyonu olarak modellenir (genelde Bayesian Ridge regresyonu). Süreç yakınsayana kadar tekrarlanır.
+ 
+**Sağlık verisinde uygunluğu:** Çok yüksek. Sütunlar arası karmaşık (doğrusal olmayan) ilişkileri yakalamada KNN'den de güçlüdür.
+ 
+**Ne zaman tercih edilmeli?** Eksik veri oranı %20-40 aralığında olduğunda ve sütunlar arası ilişki doğrusal olmadığında en güvenilir sonucu verir.
+ 
+#### Akıllı Otomatik Seçim
+Yapılan araştırma sonucunda, tek bir yöntemin tüm sütunlara uygulanmasının verimsiz olduğu, bunun yerine **eksik veri oranına göre yöntemin sütun bazında otomatik seçilmesinin** önerildiği görülmüştür:
+ 
+| Eksik Veri Oranı | Önerilen Yöntem | Gerekçe |
+|------------------|-----------------|---------|
+| < %5 | Medyan / Mod | Hızlı, fark yaratmaz |
+| %5 - %20 | KNN Imputation | Komşu bilgisinden faydalanır |
+| > %20 | MICE | Çok değişkenli ilişkileri yakalar |
+ 
+### 2. Çok Boyutlu Aykırı Değer Tespiti — Isolation Forest
+ 
+**Çalışma mantığı:** Veri setindeki kayıtlar rastgele ağaçlarla bölünür. Diğer kayıtlardan kolay "izole edilebilen" kayıtlar aykırı kabul edilir. Tüm sayısal sütunları **birlikte** değerlendirir.
+ 
+**Hafta 4'e göre üstünlüğü:** Hafta 4'teki IQR ve Z-Score yöntemleri her sütunu izole değerlendirirken, Isolation Forest sütunların **kombinasyonunu** ele alır.
+ 
+> 📌 **Klinik Örnek:** 25 yaşındaki bir hastada sistolik 195 mmHg ve kolesterol 320 mg/dL değerlerinin her biri tek başına IQR sınırları içinde kalabilir; ancak bu üçü aynı kayıtta birleştiğinde klinik olarak anormaldir. Isolation Forest bu kombinasyonu yakalar, IQR yakalayamaz.
+ 
+**Önerilen `contamination` değeri:** %5. Sektör standardı bu civardadır; çok düşük tutmak gerçek aykırıları kaçırır, çok yüksek tutmak normal kayıtları işaretler.
+ 
+### 3. Bilgi Taşımayan Sütunların Elenmesi
+ 
+**Constant sütun:** Tüm satırlarda aynı değer (ör. `ulke` = "TR"). Bilgi katkısı sıfır.
+ 
+**Quasi-constant sütun:** %99'dan fazla satırda aynı değer (ör. 500 hastadan 495'i için `para_birimi` = "TL"). ML modeli için zararlı; modelin gerçek sinyal yerine bu sabit değere odaklanmasına yol açar.
+ 
+**Önerilen yaklaşım:** Pipeline başında otomatik kontrol — `value_counts(normalize=True).iloc[0]` değeri 0.99'u aşan sütunlar otomatik kaldırılmalıdır.
+ 
+### 4. Yüksek Kardinaliteli Kategoriler — Nadir Kategori Birleştirme
+ 
+**Sorun:** Sağlık verisinde `tani_kodu` sütununda 200+ farklı ICD-10 kodu görülebilir. Bunların büyük kısmı 1-2 hastada görülür. Hepsini ayrı tutmak ML modelini bozar (boyut patlaması, overfitting).
+ 
+**Önerilen çözüm:** Veri setinin %1'inden az görülen kategoriler "Diger" başlığı altında birleştirilmelidir. Bu yöntem **frequency-based encoding** olarak da bilinir ve yüksek kardinaliteli sütunlar için literatürde standart yaklaşımlardan biridir.
+ 
+**Beklenen etki:** 35 farklı kategori → 6 anlamlı kategori (örnek senaryo).
+ 
+### 5. Çoklu Kolinearite Analizi — VIF (Variance Inflation Factor)
+ 
+**Tanım:** Bir sayısal sütunun diğer sütunlardan ne kadar tahmin edilebildiğini ölçer.
+ 
+**Eşik değerleri:**
+- VIF > 10 → Ciddi kolinearite, lineer modelde ciddi sorun
+- VIF > 5 → Dikkatli olunmalı
+- VIF ≤ 5 → Sorun yok
+**Önemli not:** VIF yüksek olan sütunlar **otomatik kaldırılmamalıdır.** Sağlık verisinde sistolik ve diastolik kan basıncı yüksek korelasyonludur ama klinik olarak ikisi de gereklidir. Bu nedenle önerilen yaklaşım: **rapor üretmek, kararı veri bilimcisi/doktorla birlikte vermek.**
+ 
+### 6. Veri Kayması (Data Drift) Tespiti — KS-test
+ 
+**Çalışma mantığı:** Kolmogorov-Smirnov istatistik testi ile train ve üretim setlerinin dağılımları karşılaştırılır. p < 0.05 ise iki dağılım istatistiksel olarak farklıdır.
+ 
+**Sağlık verisinde önemi kritik:** Pandemi, demografik değişim veya yeni klinik protokoller hasta profilini değiştirir. Üretim ortamında modelin eğitildiği zamana göre hasta profili ciddi değişebilir. Drift tespit edilirse model **yeniden eğitime** alınmalıdır.
+ 
+**Tespit sıklığı önerisi:** Üretim ortamında haftalık veya aylık periyodik kontrol.
+ 
+### 7. Doğrulama Kurallarının Yeniden Yapılandırılması
+ 
+Hafta 4'te kurallar Python sözlüğü (`dict`) olarak tanımlanmıştı. Bu yaklaşımın iki sorunu var:
+ 
+1. **Yazım hataları runtime'a kalıyor:** `"mın"` yerine `"min"` yazıldığında hata pipeline çalışırken ortaya çıkıyor.
+2. **IDE otomatik tamamlama desteği yok:** Hangi alanların tanımlanabileceği belgesiz.
+**Önerilen çözüm:** `dataclass` tabanlı sınıflar (`FieldRule`, `DataSchema`). Kurallar tek yerde belgelenir, yazım hataları **import zamanında** yakalanır.
+ 
+---
+ 
+## 📊 Hafta 4 ve Önerilen v3 Karşılaştırması
+ 
+| Konu | Hafta 4 (Mevcut v2) | Önerilen Hafta 5 (v3) |
+|------|---------------------|------------------------|
+| Eksik değer doldurma | Skewness'a göre medyan/ortalama | KNN + MICE + akıllı otomatik seçim |
+| Aykırı değer tespiti | IQR / Z-Score (tek değişkenli) | + Isolation Forest (çok boyutlu) |
+| Bilgi taşımayan sütun | Yok | Constant/quasi-constant otomatik eleme |
+| Yüksek kardinalite kategori | Yok | Nadir kategori birleştirme |
+| Sütun ilişki analizi | Yok | VIF raporu |
+| Üretim takibi | Yok | KS-test ile drift tespiti |
+| Doğrulama kuralları | `dict` | `dataclass` (tip güvenli) |
+ 
+---
+ 
+## 🎯 Beklenen İyileştirmeler
+ 
+Önerilen yöntemlerin uygulanması durumunda aşağıdaki kazanımlar beklenmektedir:
+ 
+- **Eksik veri kalitesi:** Medyan yerine KNN/MICE kullanımı, eksik değerlerin gerçek dağılıma çok daha yakın doldurulmasını sağlayacaktır. Özellikle %15 üzeri eksik içeren sütunlarda model doğruluğunda anlamlı artış beklenmektedir.
+- **Aykırı değer hassasiyeti:** Çok boyutlu yöntem sayesinde, klinik olarak anormal ama tek tek sütunlarda normal görünen kayıtlar yakalanabilecektir.
+- **Model performansı:** Constant sütunların elenmesi ve nadir kategorilerin birleştirilmesi, ML modelinin daha hızlı eğitilmesini ve overfitting riskinin azalmasını sağlayacaktır.
+- **Üretim güvenliği:** Drift tespiti sayesinde modelin ne zaman güncellenmesi gerektiği objektif olarak belirlenebilecektir.
+---
 
 *Bu README proje ilerledikçe güncellenecektir.*
