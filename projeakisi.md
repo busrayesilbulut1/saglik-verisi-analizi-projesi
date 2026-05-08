@@ -1301,4 +1301,136 @@ Hafta 4'te kurallar Python sözlüğü (`dict`) olarak tanımlanmıştı. Bu yak
 - **Üretim güvenliği:** Drift tespiti sayesinde modelin ne zaman güncellenmesi gerektiği objektif olarak belirlenebilecektir.
 ---
 
-*Bu README proje ilerledikçe güncellenecektir.*
+## 6. Hafta
+ 
+---
+ 
+## 📋 Hafta 6: Veri Analizi Projesi — Son Rötuşlar ve Nihai Dokümantasyon
+ 
+Bu hafta, proje boyunca yapılan tüm çalışmalar gözden geçirilmiş; eksik kalan noktalar tespit edilmiş, analizlerin doğruluğu teyit edilmiş ve nihai rapor için bilgiler bir araya getirilmiştir. Raporun okunabilirliğini artırmak amacıyla görsel öğeler (akış şemaları ve karşılaştırma tabloları) eklenmiştir.
+ 
+---
+ 
+## 🗺️ Projenin Bütünleşik Akışı
+ 
+Aşağıdaki diyagram, 6 hafta boyunca yapılan çalışmaların birbiriyle nasıl bağlandığını göstermektedir:
+ 
+```mermaid
+flowchart LR
+    H1[Hafta 1<br/>Kapsam Analizi]
+    H2[Hafta 2<br/>Pipeline v1]
+    H3[Hafta 3<br/>Veritabanı Şeması]
+    H4[Hafta 4<br/>Pipeline v2]
+    H5[Hafta 5<br/>İleri Yöntem Araştırması]
+    H6[Hafta 6<br/>Nihai Rapor]
+ 
+    H1 --> H2 --> H3 --> H4 --> H5 --> H6
+ 
+    style H1 fill:#e1f5ff
+    style H2 fill:#fff4e1
+    style H3 fill:#f0e1ff
+    style H4 fill:#e1ffe1
+    style H5 fill:#ffe1e1
+    style H6 fill:#fff9e1
+```
+ 
+---
+ 
+## 🏗️ Sistem Mimarisi
+ 
+Proje boyunca tasarlanan sistemin uçtan uca mimarisi:
+ 
+```mermaid
+flowchart TB
+    subgraph Kaynaklar["📥 Veri Kaynakları"]
+        K1[MIMIC-IV<br/>Klinik Kayıtlar]
+        K2[TCIA<br/>DICOM Görüntüler]
+        K3[TCGA<br/>Genetik Veriler]
+        K4[DrugBank<br/>İlaç Verileri]
+    end
+ 
+    subgraph Toplama["🔄 Veri Toplama Hattı"]
+        T1[Apache Kafka]
+        T2[HDFS<br/>Ham Depolama]
+    end
+ 
+    subgraph Temizleme["🧹 Pipeline"]
+        P1[Eksik Değer<br/>KNN / MICE]
+        P2[Aykırı Değer<br/>IQR + Isolation Forest]
+        P3[Anonimleştirme<br/>SHA-256 + Salt]
+        P4[Doğrulama<br/>DataSchema]
+    end
+ 
+    subgraph Depolama["🗄️ Yapılandırılmış Veri"]
+        D1[(PostgreSQL<br/>16 Tablo)]
+        D2[HDFS<br/>Şifreli Görüntü/Genom]
+    end
+ 
+    subgraph Analiz["🧠 ML Katmanı"]
+        M1[scikit-learn]
+        M2[TensorFlow]
+        M3[MONAI]
+    end
+ 
+    subgraph Sunum["📊 Sunum Katmanı"]
+        S1[Doktor Paneli<br/>Tableau]
+    end
+ 
+    Kaynaklar --> Toplama
+    Toplama --> Temizleme
+    Temizleme --> Depolama
+    Depolama --> Analiz
+    Analiz --> Sunum
+```
+ 
+---
+ 
+## 📊 Haftalık Çıktıların Sentezi
+ 
+### Hafta 1 — Kapsam ve Hedefler
+Projenin temel amacı veri silolarını birleştirerek hastayı 360 derecelik analiz etmektir. Üç ana hedef belirlenmiştir: bütünsel teşhis, erken teşhis ve kişiselleştirilmiş tedavi. Çalışılacak veri kaynakları MIMIC-IV, TCIA, TCGA ve DrugBank olarak netleştirilmiştir.
+ 
+### Hafta 2 — Teknoloji Yığını
+Programlama dili olarak Python, büyük veri için Apache Spark, klasik ML için scikit-learn, derin öğrenme için TensorFlow, tıbbi görüntüleme için MONAI ve görselleştirme için Tableau seçilmiştir. Bulut altyapısı olarak Microsoft Azure belirlenmiştir.
+ 
+### Hafta 3 — Veritabanı Şeması
+16 tablodan oluşan veritabanı şeması 5 ana grupta yapılandırılmıştır: klinik çekirdek, reçete, görüntüleme, laboratuvar, genetik, ML/risk ve güvenlik. Tüm tablolarda UUID kullanılmış, görüntü ve genom dosyaları HDFS'de tutulmuş, KVKK uyumu için `denetim_kaydi` tablosu eklenmiştir.
+ 
+### Hafta 4 — Pipeline v2
+Hafta 2'deki manuel temizleme adımları otomatik bir pipeline'a dönüştürülmüştür. Pandas 3.x uyumsuzluğu, LabelEncoder mapping kaybı, scaler veri sızıntısı ve KVKK hash zayıflığı gibi kritik hatalar giderilmiştir. 13/13 test başarılı sonuç vermiştir.
+ 
+### Hafta 5 — İleri Yöntem Araştırması
+Hafta 4 pipeline'ının sınırlamaları için literatürdeki ileri yöntemler araştırılmıştır: KNN ve MICE imputation, Isolation Forest aykırı tespiti, constant sütun eleme, nadir kategori birleştirme, VIF analizi ve KS-test ile drift tespiti. Bu yöntemler takıma öneri olarak sunulmuştur.
+ 
+---
+ 
+## ✅ Tutarlılık Kontrolü
+ 
+Projenin haftaları arasında alınan kararların birbiriyle tutarlılığı bu hafta gözden geçirilmiştir:
+ 
+| Kontrol Sorusu | Sonuç |
+|----------------|-------|
+| Hafta 1'deki hedefler, Hafta 3'teki şemada `risk_degerlendirme` ve `oneri` tablolarıyla karşılanmış mı? | ✅ Evet |
+| Hafta 2'de seçilen teknoloji yığını, Hafta 3'teki veri yapısını destekliyor mu? | ✅ Evet |
+| Hafta 1'de listelenen veri kaynakları, Hafta 3'teki tablolarla eşleşiyor mu? | ✅ Evet |
+| Hafta 4 pipeline'ı, Hafta 3 şemasındaki tüm sütun tiplerini destekliyor mu? | ⚠️ Kısmen |
+| KVKK gereksinimleri tüm haftalarda korunmuş mu? | ✅ Evet |
+ 
+**Tespit edilen eksik:** Tıbbi görüntü (DICOM) ön işleme adımları pipeline'da yer almamaktadır. Bu, MONAI tabanlı ayrı bir görüntü pipeline'ı ile karşılanmalıdır.
+ 
+---
+ 
+## 📈 Proje Çıktıları
+ 
+| Çıktı | Durum |
+|-------|-------|
+| Tamamlanan hafta sayısı | 6 / 6 |
+| Tasarlanan veritabanı tablosu | 16 |
+| Pipeline test başarı oranı | 13/13 |
+| Araştırılan teknoloji sayısı | 12+ |
+| Önerilen ileri yöntem sayısı | 9 |
+| KVKK uyum maddesi karşılanma | %100 |
+ 
+---
+ 
+**Hazırlayan:** Akın Ağaçbacak
