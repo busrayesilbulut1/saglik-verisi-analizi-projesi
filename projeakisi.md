@@ -197,4 +197,110 @@ Sistemin savunmasız kalabileceği noktalar ve alınan önlemler:
 - [ ] Olası bir veri ihlali durumunda uygulanacak olan "Olay Müdahale Planı"nın (Incident Response Plan) oluşturulması.
 
 ---
+## 4. Hafta
+# 🔍 Hafta 4: Veri Güvenliği ve Gizliliği Kontrolleri
+
+Bu çalışma, sistemde uygulanan hassas veri koruma tekniklerinin (maskeleme, anonimleştirme, erişim kontrolü) etkinliğini değerlendirmek, yasal uyumluluğu denetlemek ve sistem güvenliğini optimize etmek amacıyla hazırlanmıştır.
+
+---
+
+## 1. Uygulanan Tekniklerin Etkinlik Değerlendirmesi
+
+| Teknik | Mevcut Durum | Etkinlik Analizi | Risk Seviyesi |
+| :--- | :--- | :--- | :---: |
+| **Veri Maskeleme** | Statik maskeleme (örn: TC No: 123*****890) | UI seviyesinde etkili fakat veritabanı sorgularında sızıntı riski taşıyor. | Düşük |
+| **Anonimleştirme** | K-Anonimlik ($k=5$) | Veri seti küçüldükçe "Outlier" (aykırı) hastaların tespit edilme riski artıyor. | Orta |
+| **Erişim Kontrolü** | Rol Tabanlı (RBAC) | Yetki tanımları net ancak "Privilege Escalation" (yetki yükseltme) testleri eksik. | Orta |
+| **Şifreleme** | AES-256 (At Rest) | Anahtar yönetimi (Key Management) merkezi bir noktada toplandığı için tekil hata noktası riski var. | Düşük |
+
+---
+
+## 2. Mevcut Politikalara Uyumluluk Denetimi (Audit)
+
+Projenin **GDPR (KVKK)** ve **HIPAA** standartlarına uyumluluğu aşağıdaki kriterlere göre denetlenmiştir:
+
+- [x] **Veri Minimizasyonu:** Sadece analiz için gerekli olan "yaş, semptom, şehir" verileri işleniyor; "isim, adres" gibi doğrudan tanımlayıcılar işlem dışı bırakılıyor.
+- [ ] **Unutulma Hakkı:** Veritabanından bir hastanın verisinin kalıcı ve iz bırakmadan silinmesi için gerekli olan "Shredding" (veri imhası) prosedürü henüz otomatize edilmedi.
+- [x] **Veri Taşınabilirliği:** Veriler, standart JSON/CSV formatında şifreli olarak dışa aktarılabiliyor.
+
+---
+
+## 3. İyileştirme ve Optimizasyon Önerileri
+
+Sistemin savunma hattını güçlendirmek için aşağıdaki geliştirmelerin yapılması planlanmaktadır:
+
+### 🛡️ Sıfır Güven (Zero Trust) Yaklaşımı
+Sadece ağın içinde olmayı güvenli kabul etmek yerine, sistem içindeki her mikroservis arası veri alışverişinde mTLS (Mutual TLS) kullanarak her adımda kimlik doğrulama yapılmalıdır.
+
+### 🧪 Diferansiyel Gizlilik (Differential Privacy) Entegrasyonu
+Anonimleştirme sırasında veriye istatistiksel gürültü ekleyerek, veri setinden tek bir kişinin varlığının veya yokluğunun sorgu sonuçlarını etkilememesi sağlanacaktır. Bu, "Linkage Attack" (veri eşleştirme saldırıları) riskini sıfıra indirir.
+
+### 📜 Dinamik Maskeleme
+Kullanıcının yetkisine göre verinin çalışma anında (runtime) maskelenmesi sağlanmalıdır. Örneğin; bir hemşire hastanın yaşını görebilirken, bir idari personelin bu alanı sadece aralık (örn: 20-30 yaş arası) olarak görmesi sağlanacaktır.
+
+---
+
+## 4. Teknik Aksiyon Planı (Action Items)
+
+1. **Denetim:** `Audit Log` modülünün, sistem yöneticisinin bile silemeyeceği "Write-Once-Read-Many" (WORM) depolama birimine yönlendirilmesi.
+2. **Test:** Anonimleştirilmiş veri setleri üzerinde "Attack Simulation" (Saldırı Simülasyonu) yapılarak verinin ne kadar sürede de-anonimize edilebileceğinin ölçülmesi.
+3. **Uyum:** KVKK uyarınca hazırlanan "Veri İşleme Envanteri"nin kod seviyesinde dökümante edilmesi.
+
+---
+## 5. Hafta
+# 📈 Hafta 5: Model Performansını Değerlendirme ve İyileştirme
+
+Bu döküman, geliştirilen tahminleme modelinin performans metriklerini, sistemin güvenliğini (Adversarial ML) ve veri bütünlüğünü koruyacak şekilde değerlendirmek ve optimize etmek amacıyla hazırlanmıştır. 
+
+## 1. Güvenli Performans Değerlendirme Metrikleri
+
+Modelin başarısı, sadece temiz verilerle değil, aynı zamanda olası veri manipülasyonlarına karşı direncini de ölçecek şekilde analiz edilmiştir.
+
+### 🛡️ Güvenli Stabilite Analizi
+*   **Adversarial Robustness (Saldırgan Dayanıklılığı):** Modelin, giriş verilerine eklenen küçük "gürültülere" (noise) karşı verdiği tepki ölçülmüştür. Amaç, kötü niyetli verilerle modelin yanlış teşhis koymasının önüne geçmektir.
+*   **Cross-Validation & Variance Check:** Veri seti 5 parçaya bölünerek (K-Fold) test edilmiş ve varyansın ($\sigma^2$) düşük tutulması sağlanmıştır. Yüksek varyans, modelin belirli veri alt kümelerine aşırı duyarlı (overfitting) olduğunu ve manipülasyona açık olduğunu gösterir.
+
+| Metrik | Mevcut Durum | Güvenli Hedef | Önem Derecesi |
+| :--- | :---: | :---: | :--- |
+| **Recall (Duyarlılık)** | %76 | %92+ | 🚨 Kritik (Hayati) |
+| **F1-Score Kararlılığı** | $\pm \%5$ | $\pm \%1$ | 🛠️ Sistem Güvenilirliği |
+| **Adversarial Error Rate** | %18 | <%5 | 🛡️ Güvenlik |
+| **Inference Latency** | 450ms | <150ms | ⚡ DoS Direnci |
+
+---
+
+## 2. Güvenli Model İyileştirme ve Parametre Ayarları
+
+Modelin doğruluk oranını artırmak için yapılan müdahaleler, "Model Poisoning" (Model Zehirlenmesi) riskini minimize edecek şekilde tasarlanmıştır.
+
+### 🛠️ Hiperparametre Optimizasyonu (Secure Tuning)
+*   **Bayesian Optimization:** Grid Search yerine daha verimli olan Bayesyen arama kullanılarak, modelin hiperparametreleri (örn: `learning_rate`, `n_estimators`) en kararlı ve güvenli noktaya çekilmiştir.
+*   **Gradient Clipping:** Derin öğrenme veya gradyan tabanlı modellerde, gradyan patlamalarını ve bu yolla yapılabilecek manipülasyonları engellemek için gradyan sınırlama tekniği uygulanmıştır.
+
+### 🔄 Algoritma Değişiklikleri
+*   **Ensemble Robustness:** Tekil karar ağaçları yerine **XGBoost** veya **Random Forest** gibi topluluk yöntemleri tercih edilerek, tek bir veri noktasına duyarlılık azaltılmış ve sistemin genel direnci artırılmıştır.
+*   **Differential Privacy in Training:** Model eğitimi sırasında veriye kontrollü gürültü eklenerek, modelin belirli kişisel verileri "ezberlemesi" (memorization) engellenmiş ve veri gizliliği korunmuştur.
+
+---
+
+## 3. Model Bütünlüğü ve Güvenli Güncelleme (Integrity)
+
+Modelin parametreleri güncellenirken ve test edilirken şu güvenlik protokolleri takip edilir:
+
+*   **Secure Model Serialization:** Model dosyaları (`.pkl`, `.h5`) kaydedilirken ve yüklenirken, "Insecure Deserialization" açıklarını önlemek için güvenli kütüphaneler kullanılacak ve model dosyaları **SHA-256** ile imzalanacaktır.
+*   **Model Versioning (Governance):** Yapılan her parametre değişikliği ve model güncellemesi bir versiyon takip sisteminde (DVC gibi) tutularak, yetkisiz bir değişikliğin veya "model drift" olayının anında tespiti sağlanacaktır.
+*   **Outlier Detection:** Değerlendirme sırasında, modelin tahminlerini aşırı derecede saptıran "outlier" veriler otomatik olarak işaretlenerek siber güvenlik analizi için loglanacaktır.
+
+---
+
+## 4. Uygulanan Teknik Aksiyonlar
+
+### A. Robust Scaling
+Aykırı değerlerin sistemi manipüle etmemesi için `StandardScaler` yerine medyan bazlı **`RobustScaler`** kullanımı standartlaştırılmıştır:
+$$z = \frac{x_i - Q_2(x)}{Q_3(x) - Q_1(x)}$$
+
+### B. Otomatik Eşik (Threshold) Yönetimi
+Modelin "hasta/sağlıklı" ayrımını yaptığı olasılık eşiği, sadece doğruluğu değil, **False Negative** maliyetini ve güvenlik risklerini de hesaplayan bir maliyet fonksiyonu ile optimize edilmiştir.
+
+---
 
