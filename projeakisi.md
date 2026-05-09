@@ -131,3 +131,70 @@ Bu haftaki çalışma odağım, projenin veri işleme katmanını daha performan
 - **Tip Güvenliği:** `numpy.typing` kullanılarak dizi boyutları ve veri tipleri kontrol altında tutulacaktır.
 
 > **Mühendislik Notu:** Bu döküman, projenin ölçeklenebilir (scalable) bir veri analizi altyapısına sahip olması için rehber niteliğindedir.
+
+## 3. Hafta
+# 🛡️ Hafta 3: Veri Güvenliği ve Gizlilik Protokolleri Tasarımı
+
+Bu döküman, **Sağlık Verisi Analizi ve Tahminleme Sistemi** kapsamında işlenen hassas hasta verilerinin güvenliğini sağlamak, yasal uyumluluk (GDPR, HIPAA, KVKK) kriterlerini karşılamak ve olası veri ihlallerini önlemek amacıyla tasarlanmıştır.
+
+## 1. Yasal ve Etik Uyum Çerçevesi
+Sistem, "Privacy by Design" (Tasarım Yoluyla Gizlilik) prensibiyle aşağıdaki standartlara tam uyumlu geliştirilecektir:
+*   **GDPR/KVKK:** Veri minimizasyonu, unutulma hakkı ve veri işleme envanteri yönetimi.
+*   **HIPAA:** Sağlık verilerinin (PHI - Protected Health Information) korunması, teknik ve idari güvenlik önlemleri.
+
+---
+
+## 2. Temel Güvenlik Protokolleri
+
+### 🔐 Veri Şifreleme (Data Encryption)
+Veriler, yaşam döngüsünün her aşamasında şifrelenmiş halde tutulacaktır:
+*   **Data at Rest (Depolama):** Veritabanı ve HDFS (Hadoop Distributed File System) katmanında veriler **AES-256** simetrik şifreleme algoritması ile saklanacaktır. Anahtar yönetimi için KMS (Key Management Service) kullanılacaktır.
+*   **Data in Transit (Aktarım):** Sunucu ile istemci arasındaki ve mikroservislerin kendi arasındaki tüm trafik **TLS 1.3** protokolü ve SSL sertifikaları ile şifrelenecektir.
+
+### 🔑 Erişim Kontrolü ve Kimlik Doğrulama
+*   **RBAC (Role-Based Access Control):** "En Az Ayrıcalık" (Least Privilege) ilkesi uygulanacaktır.
+    *   *Doktorlar:* Sadece sorumlu oldukları hastaların tıbbi kayıtlarına erişebilir.
+    *   *Veri Analistleri:* Sadece anonimleştirilmiş veri setlerine (PII içermeyen) erişebilir.
+*   **MFA (Multi-Factor Authentication):** Sisteme girişlerde statik şifrelerin yanı sıra TOTP veya SMS tabanlı ikinci bir doğrulama katmanı zorunlu olacaktır.
+*   **Zaman Sınırlı Erişim:** Kritik verilere erişim yetkileri belirli sürelerle sınırlandırılacak ve otomatik oturum sonlandırma (Session Timeout) uygulanacaktır.
+
+### 📝 Denetim İzleri ve İzleme (Audit Trails)
+*   Sistemdeki her türlü veri erişimi, değişikliği ve silme işlemi; kullanıcı kimliği, işlem türü, kaynak IP ve zaman damgası (Timestamp) ile birlikte loglanacaktır.
+*   Log kayıtları değiştirilemez (Immutable) bir yapıda tutulacak ve periyodik olarak siber güvenlik denetimlerinden geçirilecektir.
+
+---
+
+## 3. Veri Gizliliği ve Anonimleştirme Teknikleri
+
+Analiz ve tahminleme süreçlerinde hasta gizliliğini korumak için aşağıdaki yöntemler uygulanacaktır:
+
+| Teknik | Açıklama | Uygulama Amacı |
+| :--- | :--- | :--- |
+| **Psödonimleştirme** | İsim, TC No gibi doğrudan tanımlayıcıların geri döndürülebilir bir "token" ile maskelenmesi. | Operasyonel Veri İşleme |
+| **K-Anonimlik** | Veri setindeki her bir kaydın en az $k-1$ adet başka kayıtla ayırt edilemez hale getirilmesi. | İstatistiksel Analiz |
+| **Diferansiyel Gizlilik** | Veriye kontrollü gürültü (noise) ekleyerek tekil bireylerin tespit edilmesini imkansız kılma. | Model Eğitimi |
+| **Veri Maskeleme** | Kredi kartı veya kimlik numaralarının sadece son 4 hanesinin gösterilmesi. | Arayüz Görüntüleme |
+
+---
+
+## 4. Risk Değerlendirmesi ve Güvenlik Açığı Analizi
+
+Sistemin savunmasız kalabileceği noktalar ve alınan önlemler:
+
+| Risk Tanımı | Etki | Olasılık | Önleyici Faaliyet |
+| :--- | :---: | :---: | :--- |
+| **SQL Injection / XSS** | Kritik | Düşük | Input validation, parameterized queries ve WAF kullanımı. |
+| **Kayıp/Çalıntı Cihazlar** | Yüksek | Orta | Uç nokta şifrelemesi ve uzaktan veri silme protokolleri. |
+| **Yetersiz Log Denetimi** | Orta | Orta | SIEM (Security Information and Event Management) entegrasyonu. |
+| **Brute Force Atakları** | Orta | Yüksek | IP tabanlı Rate Limiting ve Account Lockout politikaları. |
+
+---
+
+## 5. Uygulama Planı (Checklist)
+- [ ] PyCryptodome kullanılarak veritabanı seviyesinde şifreleme modüllerinin geliştirilmesi.
+- [ ] OAuth 2.0 + JWT tabanlı güvenli oturum yönetiminin kurulması.
+- [ ] Spark üzerinde veri işleme sırasında kişisel verileri filtreleyen anonimleştirme fonksiyonlarının yazılması.
+- [ ] Olası bir veri ihlali durumunda uygulanacak olan "Olay Müdahale Planı"nın (Incident Response Plan) oluşturulması.
+
+---
+
