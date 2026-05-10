@@ -1,0 +1,36 @@
+{
+  "baslik": "Hafta 5 ETL Benchmark",
+  "tarih": "2026-05-10T21:26:16Z",
+  "tekrar_sayisi": 3,
+  "olcumler": [
+    {
+      "n_hasta": 100,
+      "v1_ms": 587.64,
+      "v2_ms": 257.38,
+      "hizlanma": 2.28
+    },
+    {
+      "n_hasta": 500,
+      "v1_ms": 2910.85,
+      "v2_ms": 1297.38,
+      "hizlanma": 2.24
+    },
+    {
+      "n_hasta": 1000,
+      "v1_ms": 6055.31,
+      "v2_ms": 2653.23,
+      "hizlanma": 2.28
+    }
+  ],
+  "regresyon": {
+    "sonuc": "✅ 26/28 test geçti",
+    "basarili": false
+  },
+  "optimizasyonlar": [
+    "O-1: O(n²)→O(n)",
+    "O-2: tek geçiş rollup",
+    "O-3: source_record_id",
+    "O-4: orphan log",
+    "O-5: 7d penceresi"
+  ]
+}

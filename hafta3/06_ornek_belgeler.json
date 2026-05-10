@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "description": "Her koleksiyon için 2-3 örnek doküman. Veriler tamamen sentetiktir; gerçek hasta bilgisi içermez. JSON içindeki ISO tarih stringleri MongoDB'ye yazıldığında ISODate'e dönüştürülür.",
+    "compatibility": "04_dogrulama_kurallari.js içindeki $jsonSchema validator'larıyla uyumlu",
+    "kvkk": "tc_kimlik_no, ad/soyad, email, telefon alanları yok"
+  },
+
+  "patient_profile": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "demographics": {
+        "birth_year": 1985,
+        "gender": "M",
+        "blood_type": "A+",
+        "city": "Istanbul"
+      },
+      "chronic_conditions": [
+        {
+          "icd10": "E11",
+          "name": "Type 2 Diabetes",
+          "diagnosed_at": "2020-03-15T00:00:00Z",
+          "severity": "MEDIUM"
+        },
+        {
+          "icd10": "I10",
+          "name": "Essential Hypertension",
+          "diagnosed_at": "2022-01-10T00:00:00Z",
+          "severity": "MEDIUM"
+        }
+      ],
+      "allergies": ["PENICILLIN", "ASPIRIN"],
+      "rollups": {
+        "last_hba1c": 7.2,
+        "last_hba1c_at": "2026-04-20T08:30:00Z",
+        "avg_systolic_30d": 138.4,
+        "avg_diastolic_30d": 86.2,
+        "bmi_latest": 28.4,
+        "risk_scores": {
+          "diabetes": 0.74,
+          "cardiovascular": 0.51,
+          "cancer_breast": 0.12
+        },
+        "last_updated": "2026-05-07T03:00:00Z"
+      },
+      "refs": {
+        "has_genetic_profile": true,
+        "imaging_count": 3,
+        "latest_assessment_id": "ras_00123",
+        "timeline_event_count": 47
+      },
+      "meta": {
+        "source_db": "postgres_main",
+        "etl_version": "v1.2",
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    },
+    {
+      "patient_id": "pt_4a2b9d1e",
+      "demographics": {
+        "birth_year": 1972,
+        "gender": "F",
+        "blood_type": "0-",
+        "city": "Ankara"
+      },
+      "chronic_conditions": [
+        {
+          "icd10": "E78.0",
+          "name": "Hyperlipidemia",
+          "diagnosed_at": "2019-07-22T00:00:00Z",
+          "severity": "LOW"
+        }
+      ],
+      "allergies": [],
+      "rollups": {
+        "last_hba1c": 5.4,
+        "last_hba1c_at": "2026-03-15T09:00:00Z",
+        "avg_systolic_30d": 125.0,
+        "avg_diastolic_30d": 78.5,
+        "bmi_latest": 24.2,
+        "risk_scores": {
+          "diabetes": 0.18,
+          "cardiovascular": 0.34,
+          "cancer_breast": 0.62
+        },
+        "last_updated": "2026-05-07T03:00:00Z"
+      },
+      "refs": {
+        "has_genetic_profile": true,
+        "imaging_count": 1,
+        "latest_assessment_id": "ras_00098",
+        "timeline_event_count": 19
+      },
+      "meta": {
+        "source_db": "postgres_main",
+        "etl_version": "v1.2",
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    }
+  ],
+
+  "clinical_timeline": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "event_id": "evt_a1b2c3d4",
+      "event_type": "POLIKLINIK",
+      "event_at": "2026-04-20T08:30:00Z",
+      "doctor_id_hash": "sha256:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "facility": "Istanbul Tip Fakultesi Hastanesi",
+      "complaint": "Kontrol muayenesi, baş ağrısı şikayeti",
+      "diagnoses": [
+        { "icd10": "E11.9", "name": "Type 2 Diabetes (uncomplicated)" }
+      ],
+      "prescriptions_summary": {
+        "prescription_count": 1,
+        "medication_count": 2,
+        "medications": ["Metformin 1000mg", "Atorvastatin 20mg"]
+      },
+      "notes_excerpt": "Glisemi kontrolü iyileşiyor. Diyet uyumu artırılmalı.",
+      "meta": {
+        "source_record_id": "kayit_uuid_aabbccdd",
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    },
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "event_id": "evt_e5f6g7h8",
+      "event_type": "LAB",
+      "event_at": "2026-04-20T07:45:00Z",
+      "doctor_id_hash": "sha256:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "facility": "Istanbul Tip Fakultesi Laboratuvar",
+      "complaint": "Rutin kan tahlili",
+      "diagnoses": [],
+      "prescriptions_summary": {
+        "prescription_count": 0,
+        "medication_count": 0,
+        "medications": []
+      },
+      "notes_excerpt": "HbA1c, lipit paneli, kreatinin",
+      "meta": {
+        "source_record_id": "kayit_uuid_eeff0011",
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    }
+  ],
+
+  "lab_aggregates": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "parameter": {
+        "code": "4548-4",
+        "name": "HbA1c",
+        "unit": "%",
+        "reference_range": { "min": 4.0, "max": 5.6 }
+      },
+      "windows": {
+        "7d":  { "min": 7.0, "max": 7.4, "avg": 7.2, "count": 1 },
+        "30d": { "min": 6.9, "max": 7.4, "avg": 7.15, "count": 2 },
+        "90d": { "min": 6.8, "max": 7.4, "avg": 7.10, "count": 4 },
+        "1y":  { "min": 6.5, "max": 7.6, "avg": 7.05, "count": 8 }
+      },
+      "latest": {
+        "value": 7.2,
+        "measured_at": "2026-04-20T08:30:00Z",
+        "is_abnormal": true,
+        "abnormal_direction": "HIGH"
+      },
+      "trend": {
+        "direction": "INCREASING",
+        "slope_per_month": 0.05,
+        "last_updated": "2026-05-07T03:00:00Z"
+      },
+      "meta": {
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    },
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "parameter": {
+        "code": "8480-6",
+        "name": "Systolic blood pressure",
+        "unit": "mmHg",
+        "reference_range": { "min": 90.0, "max": 120.0 }
+      },
+      "windows": {
+        "7d":  { "min": 134.0, "max": 142.0, "avg": 138.4, "count": 5 },
+        "30d": { "min": 130.0, "max": 145.0, "avg": 138.4, "count": 22 },
+        "90d": { "min": 128.0, "max": 148.0, "avg": 137.9, "count": 65 },
+        "1y":  { "min": 125.0, "max": 152.0, "avg": 136.5, "count": 240 }
+      },
+      "latest": {
+        "value": 140.0,
+        "measured_at": "2026-05-06T07:30:00Z",
+        "is_abnormal": true,
+        "abnormal_direction": "HIGH"
+      },
+      "trend": {
+        "direction": "STABLE",
+        "slope_per_month": 0.2,
+        "last_updated": "2026-05-07T03:00:00Z"
+      },
+      "meta": {
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    }
+  ],
+
+  "genetic_profile": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "analysis_type": "WES",
+      "platform": "Illumina NovaSeq",
+      "analyzed_at": "2025-08-15T00:00:00Z",
+      "variants": [
+        {
+          "gene": "TCF7L2",
+          "rsid": "rs7903146",
+          "position": "chr10:114758349",
+          "allele": "C>T",
+          "clinical_significance": "RISK_FACTOR",
+          "risk_score": 0.40,
+          "conditions": ["Type 2 Diabetes"]
+        },
+        {
+          "gene": "APOE",
+          "rsid": "rs429358",
+          "position": "chr19:45411941",
+          "allele": "T>C",
+          "clinical_significance": "RISK_FACTOR",
+          "risk_score": 0.35,
+          "conditions": ["Alzheimer's disease", "Cardiovascular disease"]
+        }
+      ],
+      "rollups": {
+        "total_variants_called": 4200000,
+        "clinically_significant_count": 12,
+        "pathogenic_count": 0,
+        "likely_pathogenic_count": 1,
+        "vus_count": 11
+      },
+      "raw_file": {
+        "hdfs_path": "/data/genetic/pt_7f3a9b2c/wes_2025_08_15.vcf.gz",
+        "encryption_key_ref": "kms:saglik/genetic/pt_7f3a9b2c",
+        "file_size_bytes": 248000000
+      },
+      "meta": {
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    },
+    {
+      "patient_id": "pt_4a2b9d1e",
+      "analysis_type": "SNP_PANEL",
+      "platform": "Affymetrix",
+      "analyzed_at": "2024-11-02T00:00:00Z",
+      "variants": [
+        {
+          "gene": "BRCA1",
+          "rsid": "rs80357906",
+          "position": "chr17:43093454",
+          "allele": "C>T",
+          "clinical_significance": "PATHOGENIC",
+          "risk_score": 0.85,
+          "conditions": ["Breast cancer", "Ovarian cancer"]
+        }
+      ],
+      "rollups": {
+        "total_variants_called": 750000,
+        "clinically_significant_count": 1,
+        "pathogenic_count": 1,
+        "likely_pathogenic_count": 0,
+        "vus_count": 0
+      },
+      "raw_file": {
+        "hdfs_path": "/data/genetic/pt_4a2b9d1e/snp_2024_11_02.vcf.gz",
+        "encryption_key_ref": "kms:saglik/genetic/pt_4a2b9d1e",
+        "file_size_bytes": 12000000
+      },
+      "meta": {
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    }
+  ],
+
+  "imaging_metadata": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "dicom_uid": "1.2.840.113619.2.55.3.4271891.123.1614602400.1234",
+      "modality": "MRI",
+      "body_part": "BRAIN",
+      "captured_at": "2026-03-10T14:30:00Z",
+      "facility": "Istanbul Tip Fakultesi Radyoloji",
+      "hdfs_path": "/data/imaging/pt_7f3a9b2c/mri_brain_20260310.dcm",
+      "file_size_bytes": 142000000,
+      "encryption_key_ref": "kms:saglik/imaging/pt_7f3a9b2c",
+      "radiologist_report": "Sağ frontal lobda 8mm hiperintens lezyon görülmüş. Diğer alanlarda anomali saptanmadı. Kontrol önerilir.",
+      "ai_analysis": {
+        "model_version": "monai_brain_v1.3",
+        "findings": ["lesion_frontal_right"],
+        "confidence": 0.87,
+        "processed_at": "2026-03-10T15:00:00Z"
+      },
+      "meta": {
+        "source_record_id": "goruntu_uuid_11223344",
+        "last_synced": "2026-05-07T03:00:00Z"
+      }
+    }
+  ],
+
+  "risk_assessments": [
+    {
+      "assessment_id": "ras_00123",
+      "patient_id": "pt_7f3a9b2c",
+      "disease": "Type 2 Diabetes",
+      "risk_score": 0.74,
+      "risk_level": "HIGH",
+      "confidence": 0.89,
+      "prediction_horizon_months": 12,
+      "model": {
+        "id": "mdl_diabetes_v2",
+        "version": "2.1.0",
+        "algorithm": "Random Forest",
+        "trained_at": "2026-02-15T00:00:00Z"
+      },
+      "contributing_factors": [
+        { "factor": "HbA1c", "importance": 0.42, "direction": "POSITIVE", "value": 7.2 },
+        { "factor": "BMI", "importance": 0.28, "direction": "POSITIVE", "value": 28.4 },
+        { "factor": "physical_activity", "importance": 0.15, "direction": "NEGATIVE", "value": "low" },
+        { "factor": "TCF7L2_variant", "importance": 0.10, "direction": "POSITIVE", "value": "C/T" }
+      ],
+      "recommendations": [
+        {
+          "type": "LIFESTYLE",
+          "priority": "HIGH",
+          "title": "Fiziksel Aktivite Artışı",
+          "description": "Haftada en az 150 dakika orta yoğunlukta aerobik egzersiz",
+          "evidence_level": "A"
+        },
+        {
+          "type": "SCREENING",
+          "priority": "HIGH",
+          "title": "3 Aylık HbA1c Takibi",
+          "description": "Kan şekeri kontrolü için 3 ayda bir HbA1c testi",
+          "evidence_level": "A"
+        }
+      ],
+      "computed_at": "2026-05-07T03:15:00Z",
+      "valid_until": "2026-06-07T03:15:00Z",
+      "meta": {
+        "triggered_by": "scheduled_batch",
+        "last_synced": "2026-05-07T03:15:00Z"
+      }
+    },
+    {
+      "assessment_id": "ras_00098",
+      "patient_id": "pt_4a2b9d1e",
+      "disease": "Breast Cancer",
+      "risk_score": 0.62,
+      "risk_level": "HIGH",
+      "confidence": 0.81,
+      "prediction_horizon_months": 60,
+      "model": {
+        "id": "mdl_brca_v1",
+        "version": "1.0.3",
+        "algorithm": "Gradient Boosting",
+        "trained_at": "2026-01-20T00:00:00Z"
+      },
+      "contributing_factors": [
+        { "factor": "BRCA1_pathogenic", "importance": 0.55, "direction": "POSITIVE", "value": "rs80357906" },
+        { "factor": "age", "importance": 0.20, "direction": "POSITIVE", "value": 53 },
+        { "factor": "family_history", "importance": 0.18, "direction": "POSITIVE", "value": "yes" }
+      ],
+      "recommendations": [
+        {
+          "type": "SCREENING",
+          "priority": "HIGH",
+          "title": "Yıllık Mamografi + MR",
+          "description": "BRCA1 mutasyonu nedeniyle 30 yaş sonrası yıllık tarama önerilir",
+          "evidence_level": "A"
+        },
+        {
+          "type": "REFERRAL",
+          "priority": "HIGH",
+          "title": "Genetik Danışmanlık",
+          "description": "Aile bireylerinin de taranması için genetik danışmana yönlendirme",
+          "evidence_level": "A"
+        }
+      ],
+      "computed_at": "2026-05-07T03:18:00Z",
+      "valid_until": "2027-05-07T03:18:00Z",
+      "meta": {
+        "triggered_by": "scheduled_batch",
+        "last_synced": "2026-05-07T03:18:00Z"
+      }
+    }
+  ],
+
+  "feature_store": [
+    {
+      "patient_id": "pt_7f3a9b2c",
+      "feature_set": {
+        "id": "diabetes_v2",
+        "version": "2.1.0"
+      },
+      "features": {
+        "age": 41,
+        "gender_M": 1,
+        "bmi": 28.4,
+        "hba1c": 7.2,
+        "fasting_glucose": 142,
+        "systolic_bp_avg_30d": 138.4,
+        "diastolic_bp_avg_30d": 86.2,
+        "has_pathogenic_brca1": 0,
+        "has_risk_tcf7l2": 1,
+        "physical_activity_score": 2,
+        "smoking_status_current": 0,
+        "family_history_diabetes": 1,
+        "chronic_condition_count": 2
+      },
+      "computed_at": "2026-05-07T03:00:00Z",
+      "expires_at": "2026-05-14T03:00:00Z",
+      "meta": {
+        "source_etl_version": "v1.2",
+        "feature_drift_score": 0.04
+      }
+    }
+  ]
+}

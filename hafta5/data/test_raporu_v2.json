@@ -1,0 +1,154 @@
+{
+  "baslik": "Hafta 5 Regresyon (v2 ETL)",
+  "tarih": "2026-05-11T00:26:26.944468",
+  "etl_versiyonu": "v2.0",
+  "sure_sn": 0.812,
+  "ozet": {
+    "toplam": 28,
+    "gecti": 26,
+    "atlandi": 2,
+    "basarisiz": 0
+  },
+  "testler": [
+    {
+      "test": "patient_id Format",
+      "sonuc": "✅",
+      "detay": "100 profil kontrol edildi"
+    },
+    {
+      "test": "PII Alan Yasağı (tc_kimlik_no, ad, soyad, email, telefon)",
+      "sonuc": "✅",
+      "detay": "Hiçbir PII alanı bulunamadı"
+    },
+    {
+      "test": "birth_year Tipi ve Aralığı",
+      "sonuc": "✅",
+      "detay": "int, 1900-2026"
+    },
+    {
+      "test": "Gender Enum (M/F/OTHER)",
+      "sonuc": "✅",
+      "detay": "Tüm değerler geçerli"
+    },
+    {
+      "test": "blood_type Enum",
+      "sonuc": "✅",
+      "detay": "Tüm değerler geçerli"
+    },
+    {
+      "test": "ICD-10 Format (^[A-Z][0-9]{{2}})",
+      "sonuc": "✅",
+      "detay": "Lowercase kodlar filtrelendi"
+    },
+    {
+      "test": "risk_score Aralığı (0.0–1.0)",
+      "sonuc": "✅",
+      "detay": "100 değerlendirme kontrol edildi"
+    },
+    {
+      "test": "risk_level Enum (LOW/MEDIUM/HIGH/CRITICAL)",
+      "sonuc": "✅",
+      "detay": "Tüm değerler geçerli"
+    },
+    {
+      "test": "clinical_significance Enum",
+      "sonuc": "✅",
+      "detay": "Tüm varyantlar geçerli"
+    },
+    {
+      "test": "meta.last_synced Varlığı",
+      "sonuc": "✅",
+      "detay": "481 doküman kontrol edildi"
+    },
+    {
+      "test": "Hasta Sayısı Korunması",
+      "sonuc": "✅",
+      "detay": "100 hasta → 100 patient_profile"
+    },
+    {
+      "test": "Lab Aggregation Azaltır / Artırmaz",
+      "sonuc": "✅",
+      "detay": "234 kaynak çift → 232 doküman"
+    },
+    {
+      "test": "Zorunlu Alan Null Oranı Artmadı",
+      "sonuc": "✅",
+      "detay": "dogum_tarihi null oranı: 3.0% → birth_year: 3.0%"
+    },
+    {
+      "test": "Sayısal Değer Toplam Toleransı",
+      "sonuc": "✅",
+      "detay": "Kaynak toplam: 13965.5 | Latest değerler toplamı: 10786.0"
+    },
+    {
+      "test": "Aktif Tanı Sayısı Korunması",
+      "sonuc": "✅",
+      "detay": "Kaynak aktif: 113 → Embed: 113"
+    },
+    {
+      "test": "PII Tüm Satırlarda Temizlendi",
+      "sonuc": "✅",
+      "detay": "100 profilde PII yok"
+    },
+    {
+      "test": "patient_id Tekrarsızlığı",
+      "sonuc": "✅",
+      "detay": "100 ID'nin hepsi benzersiz"
+    },
+    {
+      "test": "Float Yuvarlama Sapması < 0.001",
+      "sonuc": "✅",
+      "detay": "Max fark: 0.000000"
+    },
+    {
+      "test": "Rollup: last_hba1c Doğruluğu",
+      "sonuc": "⚠️",
+      "detay": "Test verisi bu parametre için veri içermiyor — atlandı"
+    },
+    {
+      "test": "Rollup: avg_systolic_30d Doğruluğu",
+      "sonuc": "⚠️",
+      "detay": "Son 30 günde veri yok — atlandı"
+    },
+    {
+      "test": "Kronik Embed: Sadece Aktif Tanılar",
+      "sonuc": "✅",
+      "detay": "İnaktif tanılar filtrelendi, bozuk ICD-10 kodu girmedi"
+    },
+    {
+      "test": "Genetik Rollup: pathogenic_count Doğruluğu",
+      "sonuc": "✅",
+      "detay": "10 genetik profil kontrol edildi"
+    },
+    {
+      "test": "Risk Skorları: Hastalık Adı Eşleşmesi",
+      "sonuc": "✅",
+      "detay": "100 risk kaydının hepsinde disease dolu"
+    },
+    {
+      "test": "Kartezyen Çarpım Yok",
+      "sonuc": "✅",
+      "detay": "100 hasta → 100 profil (1:1)"
+    },
+    {
+      "test": "Orphan Lab Satırı Tespiti",
+      "sonuc": "✅",
+      "detay": "2 orphan satır tespit edildi ve ETL'den dışlandı"
+    },
+    {
+      "test": "Eksik FK Tespiti (tani + risk)",
+      "sonuc": "✅",
+      "detay": "tani orphan: 0, risk orphan: 0 — ETL'de atlandı"
+    },
+    {
+      "test": "Çoklu Kaynak Birleşimi: patient_profile Eksiksiz",
+      "sonuc": "✅",
+      "detay": "100 profilde tüm zorunlu alanlar mevcut"
+    },
+    {
+      "test": "Tarih Alanları UTC Normalize Edilmiş",
+      "sonuc": "✅",
+      "detay": "meta.last_synced tüm profillerde UTC formatında"
+    }
+  ]
+}
