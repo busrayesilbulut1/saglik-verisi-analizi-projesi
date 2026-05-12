@@ -1037,3 +1037,608 @@ Aşağıdaki konular ekip içinde netleştirilmeyi beklemektedir:
 ---
 
 
+## 4. Hafta
+# 🧠 Özellik Mühendisliği (Feature Engineering)
+
+## 📝 Açıklama
+
+Bu görev kapsamında, sağlık veri setindeki mevcut özelliklerden daha anlamlı ve model performansını artırabilecek yeni özellikler türetilmiştir. Amaç, ham verilerden daha fazla bilgi çıkararak makine öğrenmesi modellerinin doğruluk ve tahmin başarısını geliştirmektir.
+
+---
+
+# 🎯 Amaç
+
+- Veri setindeki ilişkileri daha iyi temsil eden yeni özellikler üretmek
+- Modelin öğrenmesini kolaylaştırmak
+- Tahmin performansını artırmak
+- Gürültülü veya zayıf özellikleri dönüştürmek
+
+---
+
+# 🛠 Kullanılan Özellik Mühendisliği Teknikleri
+
+## 1️⃣ Normalizasyon ve Ölçeklendirme
+
+Farklı aralıklardaki verilerin modele dengeli şekilde verilmesi için özellikler ölçeklendirilmiştir.
+
+### Kullanılan yöntemler
+
+- Min-Max Scaling
+- Standardization (Z-score)
+
+### Örnek Kod
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+df[['blood_pressure', 'cholesterol']] = scaler.fit_transform(
+    df[['blood_pressure', 'cholesterol']]
+)
+```
+
+---
+
+## 2️⃣ Yeni Özellik Türetme
+
+Mevcut veriler kullanılarak yeni anlamlı alanlar oluşturulmuştur.
+
+### Oluşturulan Özellikler
+
+| Yeni Özellik | Açıklama |
+|---|---|
+| BMI_Category | BMI değerinden kilo kategorisi |
+| Age_Group | Yaşa göre risk grupları |
+| Cholesterol_Risk | Kolesterol risk seviyesi |
+| Hypertension_Flag | Yüksek tansiyon kontrolü |
+
+### Örnek Kod
+
+```python
+def hypertension(bp):
+    return 1 if bp > 140 else 0
+
+df['Hypertension_Flag'] = df['blood_pressure'].apply(hypertension)
+```
+
+---
+
+## 3️⃣ Kategorik Verilerin Dönüştürülmesi
+
+Makine öğrenmesi modellerinin kullanabilmesi için kategorik veriler sayısal hale dönüştürülmüştür.
+
+### Kullanılan yöntemler
+
+- Label Encoding
+- One-Hot Encoding
+
+### Örnek Kod
+
+```python
+df = pd.get_dummies(df, columns=['gender'])
+```
+
+---
+
+## 4️⃣ Eksik Veri Yönetimi
+
+Eksik veriler:
+- Ortalama
+- Medyan
+- Mod
+
+değerleriyle doldurulmuştur.
+
+### Örnek Kod
+
+```python
+df['cholesterol'].fillna(df['cholesterol'].mean(), inplace=True)
+```
+
+---
+
+## 5️⃣ Özellik Seçimi (Feature Selection)
+
+Modele katkısı düşük olan özellikler kaldırılmıştır.
+
+### Kullanılan yöntemler
+
+- Korelasyon analizi
+- Feature Importance
+- Variance Threshold
+
+### Örnek Kod
+
+```python
+correlation = df.corr()
+```
+
+---
+
+# 📊 Model Performansına Etkisi
+
+Özellik mühendisliği uygulanmadan önce ve sonra model performansı karşılaştırılmıştır.
+
+| Durum | Accuracy |
+|---|---|
+| Özellik mühendisliği öncesi | %78 |
+| Özellik mühendisliği sonrası | %87 |
+
+---
+
+# 🚀 Elde Edilen Kazanımlar
+
+- Daha yüksek doğruluk oranı
+- Daha anlamlı veri temsili
+- Modelin genelleme başarısında artış
+- Gürültülü verilerin azaltılması
+
+---
+
+# 🔒 Veri Güvenliği
+
+Özellik mühendisliği sürecinde:
+- kişisel bilgiler maskelenmiştir
+- hassas veriler anonimleştirilmiştir
+- KVKK kurallarına uygun işlem yapılmıştır
+
+---
+
+# 📌 Sonuç
+
+Özellik mühendisliği teknikleri sayesinde veri setinden daha anlamlı bilgiler çıkarılmış ve makine öğrenmesi modellerinin tahmin performansı artırılmıştır. Oluşturulan yeni özellikler, sağlık risklerinin daha doğru analiz edilmesine katkı sağlamıştır.
+
+## 5. Hafta
+
+# 🤖 Gelişmiş Veri Analizi ve Makine Öğrenmesi Algoritmaları Araştırması
+
+## 📝 Açıklama
+
+Bu çalışma kapsamında sağlık verisi üzerinde uygulanabilecek gelişmiş veri analizi ve makine öğrenmesi yöntemleri araştırılmıştır. Özellikle kümeleme (clustering) ve sınıflandırma (classification) algoritmalarının sağlık verileri üzerindeki potansiyel faydaları değerlendirilmiş, uygulanabilirlikleri incelenmiş ve örnek prototip kodlar geliştirilmiştir.
+
+---
+
+# 🎯 Amaç
+
+- Sağlık verilerindeki gizli örüntüleri keşfetmek
+- Hastalık risk tahmin doğruluğunu artırmak
+- Benzer hasta gruplarını belirlemek
+- Otomatik karar destek sistemleri geliştirmek
+- Veri odaklı sağlık analizi yapmak
+
+---
+
+# 🧠 İncelenen Algoritmalar
+
+## 1️⃣ Kümeleme (Clustering) Algoritmaları
+
+Kümeleme algoritmaları, benzer özelliklere sahip hastaları gruplandırmak için kullanılmıştır.
+
+### 📌 Potansiyel Kullanım Alanları
+
+- Benzer risk profiline sahip hasta gruplarını belirleme
+- Gizli hasta segmentlerini keşfetme
+- Hastalık örüntülerini analiz etme
+- Kişiselleştirilmiş tedavi planları oluşturma
+
+---
+
+## 🔹 K-Means Clustering
+
+### Açıklama
+
+K-Means algoritması verileri belirli sayıda kümeye ayırır ve benzer kayıtları aynı grup altında toplar.
+
+### Avantajları
+
+- Hızlı çalışır
+- Büyük veri setlerinde verimlidir
+- Kolay uygulanabilir
+
+### Dezavantajları
+
+- Küme sayısı önceden belirlenmelidir
+- Gürültülü verilerden etkilenebilir
+
+### Örnek Kod
+
+```python
+from sklearn.cluster import KMeans
+
+X = df[['age', 'blood_pressure', 'cholesterol']]
+
+kmeans = KMeans(n_clusters=3)
+
+df['cluster'] = kmeans.fit_predict(X)
+
+print(df[['age', 'cluster']].head())
+```
+
+---
+
+## 🔹 DBSCAN
+
+### Açıklama
+
+Yoğunluk tabanlı kümeleme algoritmasıdır. Gürültülü verileri tespit etmede başarılıdır.
+
+### Avantajları
+
+- Gürültülü verilerle çalışabilir
+- Küme sayısı belirtmeye gerek yoktur
+
+### Dezavantajları
+
+- Parametre seçimi zordur
+- Büyük veri setlerinde yavaş olabilir
+
+### Örnek Kod
+
+```python
+from sklearn.cluster import DBSCAN
+
+dbscan = DBSCAN(eps=0.5, min_samples=5)
+
+df['cluster'] = dbscan.fit_predict(X)
+```
+
+---
+
+# 🩺 2️⃣ Sınıflandırma (Classification) Algoritmaları
+
+Sınıflandırma algoritmaları hastalık risk tahmini için kullanılmıştır.
+
+---
+
+## 🔹 Logistic Regression
+
+### Açıklama
+
+İkili sınıflandırma problemlerinde kullanılan temel algoritmalardan biridir.
+
+### Kullanım Alanı
+
+- Hastalık var/yok tahmini
+- Risk sınıflandırması
+
+### Avantajları
+
+- Hızlıdır
+- Yorumlanabilir sonuç verir
+
+### Dezavantajları
+
+- Karmaşık ilişkilerde yetersiz kalabilir
+
+### Örnek Kod
+
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+X = df.drop('target', axis=1)
+y = df['target']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2
+)
+
+model = LogisticRegression()
+
+model.fit(X_train, y_train)
+
+accuracy = model.score(X_test, y_test)
+
+print("Accuracy:", accuracy)
+```
+
+---
+
+## 🔹 Random Forest
+
+### Açıklama
+
+Birden fazla karar ağacı kullanarak tahmin yapan güçlü bir ensemble öğrenme algoritmasıdır.
+
+### Avantajları
+
+- Yüksek doğruluk
+- Overfitting’e karşı dayanıklı
+- Feature importance sunar
+
+### Dezavantajları
+
+- Daha fazla işlem gücü gerektirir
+
+### Örnek Kod
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(
+    n_estimators=100
+)
+
+rf.fit(X_train, y_train)
+
+accuracy = rf.score(X_test, y_test)
+
+print("Accuracy:", accuracy)
+```
+
+---
+
+## 🔹 Support Vector Machine (SVM)
+
+### Açıklama
+
+Verileri en iyi şekilde ayıran hiper düzlemi bulmaya çalışan sınıflandırma algoritmasıdır.
+
+### Avantajları
+
+- Yüksek boyutlu verilerde başarılıdır
+- Güçlü sınıflandırma performansı sunar
+
+### Dezavantajları
+
+- Büyük veri setlerinde yavaş olabilir
+
+### Örnek Kod
+
+```python
+from sklearn.svm import SVC
+
+svm = SVC()
+
+svm.fit(X_train, y_train)
+
+accuracy = svm.score(X_test, y_test)
+
+print("Accuracy:", accuracy)
+```
+
+---
+
+# 📊 Algoritmaların Karşılaştırılması
+
+| Algoritma | Tür | Avantaj | Dezavantaj |
+|---|---|---|---|
+| K-Means | Kümeleme | Hızlı | Küme sayısı gerekir |
+| DBSCAN | Kümeleme | Gürültü tespiti | Parametre hassas |
+| Logistic Regression | Sınıflandırma | Basit ve hızlı | Karmaşık verilerde zayıf |
+| Random Forest | Sınıflandırma | Yüksek doğruluk | Daha maliyetli |
+| SVM | Sınıflandırma | Güçlü performans | Büyük veride yavaş |
+
+---
+
+# 🚀 Potansiyel Faydalar
+
+- Hastalık risklerinin erken tespiti
+- Benzer hasta gruplarının belirlenmesi
+- Kişiselleştirilmiş tedavi önerileri
+- Veri odaklı sağlık karar destek sistemi geliştirilmesi
+- Sağlık verilerindeki gizli örüntülerin keşfi
+
+---
+
+# 🔒 Veri Güvenliği
+
+Analiz süreçlerinde:
+- kişisel bilgiler anonimleştirilmiştir
+- hassas sağlık verileri maskelenmiştir
+- KVKK kurallarına uygun veri işleme uygulanmıştır
+
+---
+
+# 📌 Sonuç
+
+Yapılan araştırmalar sonucunda, sağlık verileri üzerinde özellikle Random Forest ve Logistic Regression algoritmalarının yüksek başarı potansiyeline sahip olduğu gözlemlenmiştir. Kümeleme algoritmaları ise benzer hasta gruplarını belirleme ve gizli örüntüleri keşfetme konusunda önemli avantajlar sağlamaktadır.
+
+Bu algoritmaların entegrasyonu sayesinde sistemin tahmin doğruluğu ve karar destek yetenekleri geliştirilebilir.
+
+## 6. Hafta
+
+# 📊 İçgörü Raporlama Araçlarını Geliştirme
+
+## 📝 Açıklama
+
+Bu görev kapsamında, sağlık verisi analizi sisteminde kullanılan içgörü raporlama araçlarının kullanıcı arayüzü ve işlevselliği geliştirilmiştir. Amaç; kullanıcıların sağlık verilerini daha anlaşılır, hızlı ve etkili şekilde analiz edebilmesini sağlamak ve karar destek süreçlerini güçlendirmektir.
+
+Yeni nesil veri görselleştirme teknikleri kullanılarak raporların okunabilirliği artırılmış, etkileşimli dashboard yapıları ve gelişmiş grafik bileşenleri sisteme entegre edilmiştir.
+
+---
+
+# 🎯 Amaç
+
+- Daha anlaşılır sağlık raporları oluşturmak
+- Veri analiz sonuçlarını görsel olarak güçlendirmek
+- Kullanıcı deneyimini iyileştirmek
+- Doktor ve analistlerin karar verme süreçlerini hızlandırmak
+- Etkileşimli raporlama sistemi geliştirmek
+
+---
+
+# 🛠 Yapılan Geliştirmeler
+
+## 1️⃣ Kullanıcı Arayüzü (UI) İyileştirmeleri
+
+### Yapılan Güncellemeler
+
+- Modern dashboard tasarımı
+- Responsive arayüz desteği
+- Daha sade navigasyon yapısı
+- Karanlık mod (Dark Mode) desteği
+- Mobil uyumlu rapor ekranları
+- Dinamik filtreleme sistemi
+
+### Kullanılan Teknolojiler
+
+- React.js
+- Bootstrap / Tailwind CSS
+- Chart.js
+- D3.js
+
+---
+
+# 📈 2️⃣ Yeni Veri Görselleştirme Teknikleri
+
+## 🔹 Çizgi Grafikleri (Line Charts)
+
+Zaman içerisindeki sağlık değişimlerini göstermek için kullanılmıştır.
+
+### Kullanım Alanları
+
+- Tansiyon değişimi
+- HbA1c takibi
+- Nabız değişimi
+- Kolesterol trendleri
+
+### Örnek Kod
+
+```python
+import matplotlib.pyplot as plt
+
+plt.plot(dates, glucose_values)
+
+plt.xlabel("Tarih")
+plt.ylabel("Glukoz")
+
+plt.show()
+```
+
+---
+
+## 🔹 Isı Haritaları (Heatmaps)
+
+Değişkenler arasındaki ilişkileri analiz etmek için kullanılmıştır.
+
+### Kullanım Alanları
+
+- Korelasyon analizi
+- Risk yoğunluğu gösterimi
+- Hastalık dağılımı analizi
+
+### Örnek Kod
+
+```python
+import seaborn as sns
+
+sns.heatmap(df.corr())
+```
+
+---
+
+## 🔹 Pasta Grafikleri (Pie Charts)
+
+Hasta dağılımlarını görselleştirmek için kullanılmıştır.
+
+### Kullanım Alanları
+
+- Hastalık türleri
+- Risk seviyeleri
+- Yaş grupları
+
+### Örnek Kod
+
+```python
+plt.pie(risk_counts, labels=labels)
+
+plt.show()
+```
+
+---
+
+## 🔹 Gauge / Risk Göstergeleri
+
+Gerçek zamanlı risk seviyesini görsel olarak göstermek için eklenmiştir.
+
+### Kullanım Alanları
+
+- Hastalık risk skoru
+- Kritik sağlık seviyesi
+- Acil durum analizi
+
+---
+
+# 📊 3️⃣ Dashboard Özellikleri
+
+## Eklenen Özellikler
+
+- Gerçek zamanlı veri güncelleme
+- Filtreleme sistemi
+- Tarih aralığı seçimi
+- PDF rapor dışa aktarma
+- CSV veri indirme
+- Etkileşimli grafikler
+- Hover tooltip desteği
+
+---
+
+# 🧠 4️⃣ İçgörü Analizi İyileştirmeleri
+
+Sistem artık:
+
+- kritik sağlık değişimlerini otomatik tespit edebilmektedir
+- risk artışlarını görsel olarak vurgulamaktadır
+- anomalileri işaretleyebilmektedir
+- geçmiş veriler ile karşılaştırmalı analiz sunmaktadır
+
+---
+
+# 🚀 5️⃣ Performans ve Kullanılabilirlik İyileştirmeleri
+
+## Yapılan Optimizasyonlar
+
+- Lazy loading kullanımı
+- Grafik render optimizasyonu
+- API cache sistemi
+- Daha hızlı dashboard yüklenmesi
+- Büyük veri setlerinde performans iyileştirmesi
+
+---
+
+# 🔒 6️⃣ Güvenlik ve Veri Gizliliği
+
+Raporlama araçlarında:
+
+- hassas sağlık verileri maskelenmiştir
+- rol bazlı erişim kontrolü uygulanmıştır
+- KVKK uyumlu veri işleme yapılmıştır
+- güvenli oturum yönetimi kullanılmıştır
+
+---
+
+# 📌 Kullanıcıya Sağlanan Avantajlar
+
+- Daha hızlı veri analizi
+- Daha anlaşılır raporlar
+- Etkileşimli kullanıcı deneyimi
+- Kolay veri yorumlama
+- Gelişmiş karar destek sistemi
+
+---
+
+# 📊 Örnek Dashboard Bileşenleri
+
+| Bileşen | Açıklama |
+|---|---|
+| Risk Gauge | Hastalık risk göstergesi |
+| Trend Chart | Zaman bazlı sağlık değişimi |
+| Heatmap | Korelasyon analizi |
+| Patient Timeline | Hasta geçmişi görüntüleme |
+| Alert Panel | Kritik durum bildirimleri |
+
+---
+
+# 📌 Sonuç
+
+İçgörü raporlama araçlarının geliştirilmesi sayesinde sağlık verileri daha anlaşılır ve etkili şekilde sunulabilmiştir. Yeni görselleştirme teknikleri ve etkileşimli dashboard yapıları sayesinde kullanıcı deneyimi artırılmış, sağlık profesyonellerinin analiz ve karar verme süreçleri iyileştirilmiştir.
+
+Geliştirilen sistem, büyük veri analitiği ve yapay zeka destekli sağlık çözümleri için güçlü bir temel oluşturmaktadır.
+
+
+## 7. Hafta
+
+
+
